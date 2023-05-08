@@ -4,7 +4,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-import string, random
+import string, random, os
 
 def generate_certificates():
     # Generar una clave privada RSA
@@ -33,8 +33,9 @@ def generate_certificates():
         .sign(private_key, hashes.SHA256())
     )
 
+    os.makedirs('certificates')
     # Guardar la clave privada en un archivo PEM
-    with open('private_key.pem', 'wb') as f:
+    with open('certificates/private_key.pem', 'wb') as f:
         f.write(
             private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -44,7 +45,7 @@ def generate_certificates():
         )
 
     # Guardar el certificado en un archivo PEM
-    with open('certificate.pem', 'wb') as f:
+    with open('certificates/certificate.pem', 'wb') as f:
         f.write(
             cert.public_bytes(serialization.Encoding.PEM)
         )

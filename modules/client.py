@@ -2,7 +2,7 @@ import ssl, socket
 from modules.netfuncs import get_ip
 from modules.gen_funcs import generate_password
 class ClientSocket():
-    def __init__(self, code, password=None):
+    def __init__(self, code, password):
         self.host = get_ip() + code
         self.password = password
     
@@ -11,8 +11,6 @@ class ClientSocket():
         PORT = 8855
 
         # Definir la contraseña para la conexión segura
-        if self.password == None:
-            self.password = generate_password()
 
         # Crear un objeto socket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
