@@ -15,10 +15,7 @@ def get_ip(client=True):
             s.connect(('8.8.8.8', 80))
             # Obtener la dirección IP asignada al socket
             ip_address = s.getsockname()[0]
-            if client:
-                return ip_address[:len(ip_address) - 3]
-            else:
-                return ip_address[:len(ip_address) - 3], ip_address
+            return ip_address
         except socket.error:
             # En caso de error, retornar None o manejarlo de acuerdo a tus necesidades
             return None
