@@ -1,6 +1,5 @@
 import socket, os
 from tqdm import tqdm
-from progress.bar import ShadyBar as Bar
 
 class SocketClient():
     HEADER_TEMPLATE = u"{},{},{}"
