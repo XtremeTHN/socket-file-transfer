@@ -1,6 +1,7 @@
 import argparse, sys
 from modules.server import SocketServer
 from modules.client import SocketClient
+from modules.netfuncs import getip
 
 parser = argparse.ArgumentParser(prog="transfer", description="Data transferer with sockets")
 
@@ -13,7 +14,7 @@ parser.add_argument("-s", "--shell", action="store_true", dest="shell", help="Sh
 args = parser.parse_args()
 
 if args.server_host:
-    print(f"Escuchando en {args.server_host} en el puerto 8080")
+    print(f"Escuchando en {getip()} en el puerto 8080")
     try:
         server = SocketServer()
     except ConnectionRefusedError:
