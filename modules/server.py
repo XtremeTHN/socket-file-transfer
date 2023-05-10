@@ -1,12 +1,13 @@
 import socket, sys
 from tqdm import tqdm
+from modules.netfuncs import getip
 
 class SocketServer():
     ACCESS_DENIED = u"ACCESS_DENIED".encode()
     ACCESS_GRANTED = u"ACCESS_GRANTED".encode()
     def __init__(self):
         self.sock = socket.socket()
-        self.sock.bind(("localhost", 8080))
+        self.sock.bind((getip(), 8080))
         
         self.sock.listen()
         serv_sock, address = self.sock.accept()
