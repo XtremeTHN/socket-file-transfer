@@ -6,7 +6,7 @@ class SocketClient():
     def __init__(self, data: str, address: tuple | list):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Esperando confirmacion...')
-        self.sock.connect(("localhost", 8080))
+        self.sock.connect(address)
         
         if os.path.isfile(data):
             self.file = open(data, 'rb')
