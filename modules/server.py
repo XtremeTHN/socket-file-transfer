@@ -94,7 +94,7 @@ class SocketServer():
                     print(f"Executing python command {header[1]}...")
                     try:
                         exec(header[1])
-                    except (NameError) as e:
+                    except Exception as e:
                         print(f"Error: {e}")
                 else:
                     print("No se permite ejecutar comandos en este servidor")

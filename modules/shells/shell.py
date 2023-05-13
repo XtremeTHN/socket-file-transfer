@@ -55,8 +55,6 @@ class Shell():
                         SocketServer(allow_shell=True if "--allow-command-exec" in args else False, multi_connections=True if "--allow-multi-connections" in args else False)
                 except IndexError:
                     print(f"{args[0]}: No hay argumentos suficientes")
-                except:
-                    print(f"{args[0]}: Hubo un error")
             elif args[0] == "clear":
                 os.system("cls" if sys.platform == "win32" else "clear")
             elif args[0] == "exit":
