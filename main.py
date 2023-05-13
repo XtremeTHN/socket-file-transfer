@@ -4,7 +4,7 @@ from modules.client import SocketClient, Operations
 from modules.exception_handler import ExceptionHandler
 from modules.misc import init_log
 from modules.netfuncs import getip
-from modules.shell import Shell, analyze_command
+from modules.shells.shell import Shell
 
 parser = argparse.ArgumentParser(prog="transfer", description="Data transferer with sockets")
 
@@ -50,4 +50,4 @@ if args.host:
         print("Acceso denegado al servidor")
 
 if args.shell:
-    Shell().start()
+    Shell().run()

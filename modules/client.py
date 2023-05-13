@@ -6,8 +6,6 @@ class SendTypes:
     NULL = "NULL"
     STRING = "STRING"
     REQUEST = "REQUEST"
-    SHELL_COMMAND = "SHELL_COMMAND"
-    PYTHON_COMMAND = "PYTHON_COMMAND"
     
 class RecieveTypes:
     OK = "OK"
@@ -16,7 +14,9 @@ class RecieveTypes:
     
 class Operations:
     SHUTDOWN = "SHUTDOWN"
-    
+    CLOSE = "CLOSE"
+    SHELL_COMMAND = "SHELL_COMMAND"
+    PYTHON_COMMAND = "PYTHON_COMMAND"
 class SocketClient():
     HEADER_TEMPLATE = u"{},{},{}"
     def __init__(self, data: str, address: tuple | list):
@@ -34,7 +34,10 @@ class SocketClient():
                 pass
             self.result = False
         print("Accesso permitido...")
+        self.format_header(data)
+
         
+    def format_header(self, data):
         if os.path.isfile(data):
             self.file = open(data, 'rb')
             self.size = os.path.getsize(data)
@@ -49,8 +52,6 @@ class SocketClient():
             self.type = SendTypes.STRING
             self.data = data
             self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.NULL, SendTypes.NULL).encode()
-        
-        
         
     def run(self):
         print("Sending data...")
@@ -100,7 +101,7 @@ class SocketClientShell():
             self.file = open(data, 'rb')
             self.size = os.path.getsize(data)
             self.type = SendTypes.FILE
-            self.header = self.HEADER_TEMPLATE.format("FILE", os.path.basename(data), self.size).encode()
+            self.header = self.HEADER_TEMPLATE.format(SendTypes.FILE, os.path.basename(data), self.size).encode()
         elif operation == Operations.SHUTDOWN:
             self.header = self.HEADER_TEMPLATE.format(Operations.SHUTDOWN, SendTypes.NULL, SendTypes.NULL).encode()
             self.data = data
@@ -108,7 +109,7 @@ class SocketClientShell():
         else:
             self.type = SendTypes.STRING
             self.data = data
-            self.header = self.HEADER_TEMPLATE.format("STRING", SendTypes.NULL, SendTypes.NULL).encode()
+            self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.NULL, SendTypes.NULL).encode()
     
     def send(self):
         self.sock.sendall(self.header)
@@ -122,8 +123,10 @@ class SocketClientShell():
                 progress_bar.update(len(chunk))
                 self.sock.sendall(chunk)
             progress_bar.close()
-        elif self.type == SendTypes.STRING or SendTypes.PYTHON_COMMAND or SendTypes.SHELL_COMMAND:
+        elif self.type == SendTypes.STRING or Operations.PYTHON_COMMAND or Operations.SHELL_COMMAND:
             self.sock.sendall(self.data.encode())
+        elif self.type == Operations.CLOSE:
+            self.sock.sendall(SendTypes.NULL.encode())
         elif self.type == Operations.SHUTDOWN:
             self.sock.sendall(SendTypes.NULL.encode())
         print("Datos enviados correctamente")

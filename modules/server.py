@@ -6,12 +6,13 @@ class ResponseTypes:
     FILE = "FILE"
     STRING = "STRING"
     REQUEST = "REQUEST"
-    SHUTDOWN = "SHUTDOWN"
-    SHELL_COMMAND = "SHELL_COMMAND"
-    PYTHON_COMMAND = "PYTHON_COMMAND"
+    NULL = "NULL"
 
 class Operations:
     SHUTDOWN = "SHUTDOWN"
+    CLOSE = "CLOSE"
+    SHELL_COMMAND = "SHELL_COMMAND"
+    PYTHON_COMMAND = "PYTHON_COMMAND"
     
 class SocketServer():
     ACCESS_DENIED = u"ACCESS_DENIED".encode()
@@ -61,15 +62,20 @@ class SocketServer():
                 serv_sock.sendall(self.ACCESS_GRANTED)
                 
                 progress_bar = tqdm(total=int(header[2]), unit='B', unit_scale=True)
-                while True:
+                while self.running:
                     chunk = serv_sock.recv(1024)
                     if not chunk:
                         break
                     file.write(chunk)
                     progress_bar.update(len(chunk))
                 file.close()
+                progress_bar.clear()
+                progress_bar.close()
             elif header[0] == ResponseTypes.STRING:
                 print(serv_sock.recv(1024).decode())
+            elif header[0] == Operations.CLOSE:
+                serv_sock.close()
+                break
             elif header[0] == Operations.SHUTDOWN:
                 if input("Alguien quiere apagar este servidor. Apagar? (S/N): ") != "N" or "n":
                     serv_sock.close()
@@ -77,16 +83,19 @@ class SocketServer():
                     self.sock.close()
                     break
                 
-            elif header[0] == ResponseTypes.SHELL_COMMAND:
+            elif header[0] == Operations.SHELL_COMMAND:
                 if self.allow_shell:
                     print(f"Ejecutando comando {header[1]}...")
                     os.system(header[1])
                 else:
                     print("No se permite ejecutar comandos en este servidor")
-            elif header[0] == ResponseTypes.PYTHON_COMMAND:
+            elif header[0] == Operations.PYTHON_COMMAND:
                 if self.allow_shell:
                     print(f"Executing python command {header[1]}...")
-                    exec(header[1])
+                    try:
+                        exec(header[1])
+                    except (NameError) as e:
+                        print(f"Error: {e}")
                 else:
                     print("No se permite ejecutar comandos en este servidor")
 
