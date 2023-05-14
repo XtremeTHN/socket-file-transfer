@@ -1,0 +1,1 @@
+{"timeout": 10, "max_logs": 10, "activated_by_default": {"allow_shell": false, "allow_multi_connections": true}}

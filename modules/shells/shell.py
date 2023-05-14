@@ -1,6 +1,7 @@
 from modules.client import SocketClientShell, Operations
 from modules.server import SocketServer
-from modules.shells.python import PythonInteractiveShell
+from modules.shells.python import PythonExecutor
+from modules.shells.os_shell import CmdExecutor
 from modules.netfuncs import getip
 
 import shlex, os, sys
@@ -28,13 +29,19 @@ class Shell():
                         self.client.send()
                     elif args[1] == "execute":
                         if args[2] == "python":
-                            py_shell = PythonInteractiveShell(self.client.sock)
+                            py_shell = PythonExecutor(self.client.sock)
                             if args[-1] == "python":
                                 py_shell.main_loop()
                             else:
                                 if py_shell.eval_code(args[3]):
                                     py_shell.format_header(args[3])
                                     py_shell.send_code(args[3])
+                        elif args[2] == "os":
+                            os_shell = CmdExecutor(self.client.sock)
+                            if args[-1] == "os":
+                                os_shell.main_loop()
+                            else:
+                                os_shell.exec_cmd(args[-1])
 
                     elif args[1] == "close":
                         self.client.set_data_to_send("", Operations.CLOSE)

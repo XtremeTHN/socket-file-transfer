@@ -1,25 +1,10 @@
 import socket, os, sys
 from tqdm import tqdm
+from modules.shells.misc import SendTypes, Operations, RecieveTypes
 
-class SendTypes:
-    FILE = "FILE"
-    NULL = "NULL"
-    STRING = "STRING"
-    REQUEST = "REQUEST"
-    
-class RecieveTypes:
-    OK = "OK"
-    ACCESS_DENIED = "ACCESS_DENIED"
-    ACCESS_GRANTED = "ACCESS_GRANTED"
-    
-class Operations:
-    SHUTDOWN = "SHUTDOWN"
-    CLOSE = "CLOSE"
-    SHELL_COMMAND = "SHELL_COMMAND"
-    PYTHON_COMMAND = "PYTHON_COMMAND"
 class SocketClient():
     HEADER_TEMPLATE = u"{},{},{}"
-    def __init__(self, data: str, address: tuple | list):
+    def __init__(self, data: str, address: tuple | list, timeout=10):
         self.result = True
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Esperando confirmacion...')
@@ -51,7 +36,7 @@ class SocketClient():
         else:
             self.type = SendTypes.STRING
             self.data = data
-            self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.NULL, SendTypes.NULL).encode()
+            self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.get_string_size(data), SendTypes.NULL).encode()
         
     def run(self):
         print("Sending data...")
@@ -71,15 +56,15 @@ class SocketClient():
                 print("Se denego la operacion")
         elif self.type == Operations.SHUTDOWN:
             self.sock.sendall(SendTypes.NULL.encode())
-        elif self.type == SendTypes.STRING or SendTypes.PYTHON_COMMAND or SendTypes.SHELL_COMMAND:
+        elif self.type == SendTypes.STRING or Operations.PYTHON_COMMAND or Operations.SHELL_COMMAND:
             self.sock.sendall(self.data.encode())
 
 class SocketClientShell():
     HEADER_TEMPLATE = u"{},{},{}"
-    def __init__(self, address):
+    def __init__(self, address, timeout=10):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Esperando confirmacion...')
-        self.sock.settimeout(10)
+        self.sock.settimeout(timeout)
         self.sock.connect((address, 8080))
         
         self.sock.sendall(SendTypes.REQUEST.encode())
@@ -109,7 +94,7 @@ class SocketClientShell():
         else:
             self.type = SendTypes.STRING
             self.data = data
-            self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.NULL, SendTypes.NULL).encode()
+            self.header = self.HEADER_TEMPLATE.format(SendTypes.STRING, SendTypes.get_string_size(data), SendTypes.NULL).encode()
     
     def send(self):
         self.sock.sendall(self.header)
