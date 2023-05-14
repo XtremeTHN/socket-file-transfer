@@ -33,20 +33,20 @@ class SocketServer():
             
             self.logger.info("Listening for connections...")
             self.sock.listen()
-            with self.sock.accept() as (serv_sock, address):
-                self.logger.info(f"Device connected {address}")
-                print(f"IP entrante: {address}")
-                if input(f"Aceptas la conexion? (S/N): ") == "N":
-                    serv_sock.sendall(self.ACCESS_DENIED)
-                    serv_sock.close()
-                    self.sock.close()
-                    return
-                serv_sock.sendall(self.ACCESS_GRANTED)
-                if multi_connections:
-                    self.logger.info("Creating connection scanner thread...")
-                    self.connect_thread = threading.Thread(target=self.init_thread)
-                self.main_server_loop(serv_sock, address)
-                self.threads = 0
+            serv_sock, address = self.sock.accept()
+            self.logger.info(f"Device connected {address}")
+            print(f"IP entrante: {address}")
+            if input(f"Aceptas la conexion? (S/N): ") == "N":
+                serv_sock.sendall(self.ACCESS_DENIED)
+                serv_sock.close()
+                self.sock.close()
+                return
+            serv_sock.sendall(self.ACCESS_GRANTED)
+            if multi_connections:
+                self.logger.info("Creating connection scanner thread...")
+                self.connect_thread = threading.Thread(target=self.init_thread)
+            self.main_server_loop(serv_sock, address)
+            self.threads = 0
 
     def main_server_loop(self, serv_sock: socket.socket, address):
         if self.connect_thread:
