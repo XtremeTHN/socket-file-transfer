@@ -45,8 +45,8 @@ class SocketServer():
             if multi_connections:
                 self.logger.info("Creating connection scanner thread...")
                 self.connect_thread = threading.Thread(target=self.init_thread)
+                self.threads = 0
             self.main_server_loop(serv_sock, address)
-            self.threads = 0
 
     def main_server_loop(self, serv_sock: socket.socket, address):
         if self.connect_thread:
