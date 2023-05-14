@@ -37,7 +37,7 @@ class Shell():
                                     py_shell.format_header(args[3])
                                     py_shell.send_code(args[3])
                         elif args[2] == "os":
-                            os_shell = CmdExecutor(self.client.sock)
+                            os_shell = CmdExecutor(self.client.sock, self.client.serv_info)
                             if args[-1] == "os":
                                 os_shell.main_loop()
                             else:

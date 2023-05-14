@@ -1,23 +1,22 @@
 import sys, socket, os, subprocess
 
-if sys.platform == "win32":
-    WELCOME_MSG = "Windows Powershell cmds executer, you can execute a command in the server and get the output!"
-    DEFAULT_SHELL = ["powershell", "-NonInteractive"]
-    from pygments.lexers.shell import PowerShellLexer as ShellLexer
-else:
-    WELCOME_MSG = "Unix shell commands executer, you can execute a unix command in the server and get the output!"
-    DEFAULT_SHELL = []
-    from pygments.lexers.shell import BashLexer as ShellLexer
-
 from modules.shells.misc import BaseShellClass, Operations, SendTypes
     
 class CmdExecutor(BaseShellClass):
     HEADER_TEMPLATE = u"{},{},{}"
-    def __init__(self, socket: socket.socket) -> None:
+    def __init__(self, socket: socket.socket, platform: str) -> None:
+        
+        if platform == "win32":
+            self.WELCOME_MSG = "Windows Powershell cmds executer, you can execute a command in the server and get the output!"
+            self.DEFAULT_SHELL = ["powershell", "-NonInteractive"]
+            from pygments.lexers.shell import PowerShellLexer as ShellLexer
+        else:
+            self.WELCOME_MSG = "Unix shell commands executer, you can execute a unix command in the server and get the output!"
+            from pygments.lexers.shell import BashLexer as ShellLexer
         super().__init__(socket, ShellLexer)
     
     def main_loop(self):
-        print(WELCOME_MSG)
+        print(self.WELCOME_MSG)
         while True:
             cmd = self.session.prompt("Posh > ")
             if cmd == "exit":
@@ -32,9 +31,14 @@ class CmdExecutor(BaseShellClass):
         return output
         
 class ServerCmdUtils:
-    def exec_cmd(serv_sock: socket.socket, buffer):
+    def exec_cmd(serv_sock: socket.socket, buffer: str | int):
         cmd = serv_sock.recv(int(buffer)).decode()
-        output = subprocess.Popen(DEFAULT_SHELL.append(cmd), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if sys.platform == "win32":
+            DEFAULT_SHELL = ["powershell", "-NonInteractive"]
+        else:
+            DEFAULT_SHELL = []
+        DEFAULT_SHELL.append(cmd)
+        output = subprocess.Popen(DEFAULT_SHELL, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = output.communicate()
         print(stdout.decode())
         serv_sock.sendall(str(SendTypes.get_string_size(stdout)).encode())

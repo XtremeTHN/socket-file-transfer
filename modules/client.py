@@ -76,7 +76,8 @@ class SocketClientShell():
             except:
                 pass
             print("Se denego el acceso")
-            sys.exit("127")
+            sys.exit(14)
+        self.serv_info = self.sock.recv(1024).decode()
     
     def close(self):
         self.sock.close()

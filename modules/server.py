@@ -23,6 +23,9 @@ class SocketServer():
         self.logger  = logging.getLogger("Server")
         self.allow_shell = allow_shell
         self.connect_thread = None
+        self.connections = 0
+        self.max_connections = 10
+        self.ignore_exceptions = True
         self.log_file_name = log_file_name
         
         ip = getip()
@@ -56,9 +59,9 @@ class SocketServer():
                 self.connect_thread.start()
         
         print("Esperando datos de la conexion", address)
+        serv_sock.sendall(sys.platform.encode())
         while self.running:
             try:
-                self.logger.info("Waiting for header...")
                 header = serv_sock.recv(1024).decode().split(",")
                 
                 if header[0] == ResponseTypes.FILE:
@@ -81,6 +84,7 @@ class SocketServer():
                     
                 elif header[0] == Operations.SHELL_COMMAND:
                     self.logger.info("Shell command header recieved")
+                    self.logger.info("Sending os information")
                     if self.allow_shell:
                         self.logger.debug(f"Executing command with length of {header[1]}")
                         ServerCmdUtils.exec_cmd(serv_sock, header[1])
@@ -130,12 +134,16 @@ class SocketServer():
         progress_bar.close()
         self.logger.info("Done!")
     
-    def handle_string_header(serv_sock: socket.socket, header: list):
+    def handle_string_header(self, serv_sock: socket.socket, header: list):
         print(serv_sock.recv(int(header[1])).decode())
     
     
     def grant_connect_permission_thread(self):
         while self.running:
+            if self.connections >= self.max_connections:
+                print("Ya no se permiten mas conexiones en este servidor")
+                return
+            self.sock.listen()
             serv_sock, address = self.sock.accept()
             print(f"IP entrante: {address}")
             if input(f"Aceptas la conexion? (S/N): ") == "N":
@@ -143,8 +151,10 @@ class SocketServer():
                 serv_sock.close()
                 return
             serv_sock.sendall(self.ACCESS_GRANTED)
+            print("Thread")
             threading.Thread(target=self.main_server_loop, args=[serv_sock, address]).start()
-    
+            self.connections += 1
+            
     def cleanup(self):
         self.running = False
         try:
