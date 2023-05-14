@@ -99,6 +99,10 @@ class SocketServer():
                     else:
                         self.logger.warning("Commands are not allowed in this server")
                         print("No se permite ejecutar comandos en este servidor")
+            except (ConnectionAbortedError, ConnectionResetError, ConnectionError):
+                print("Connection error found")
+                print("Closing server...")
+                self.cleanup()
             except Exception as e:
                 print(f"Error: {e}")
                 if self.ignore_exceptions:
@@ -108,6 +112,7 @@ class SocketServer():
                 else:
                     print("Closing server...")
                     self.cleanup()
+
 
     def handle_file_header(self, serv_sock: socket.socket, header: list):
         self.logger.info("Received file header!")
