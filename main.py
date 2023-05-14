@@ -27,7 +27,7 @@ logger = logging.getLogger("Transfer")
 
 conf_obj = Json("configs/preferences.json", {'timeout':10, 'max_logs':10, 'activated_by_default':{'allow_shell':False, 'allow_multi_connections':True}}, indent=4)
 config = conf_obj.get()
-log_file_name = init_log("SocketFileTransfer", config[max_logs])
+log_file_name = init_log("SocketFileTransfer", config['max_logs'])
 
 if args.server_host:
     print(f"Esperando conexiones en {getip()} en el puerto 8080")
